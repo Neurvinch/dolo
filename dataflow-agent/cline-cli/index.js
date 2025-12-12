@@ -76,7 +76,20 @@ async function main() {
                 choices: ['None', 'Bearer Token', 'API Key', 'Basic Auth']
             }
         ])
+        dataSources.push(source);
     }
+
+    const workflow = {...WORKFLOW_TEMPLATE};
+
+    workflow.id = answers.workflow_name
+
+    dataSources.forEach( (source, idx )=>{
+
+        const fetchTaskId = `fetch_${source.name}`;
+
+        
+
+    })
 
 
 }
