@@ -43,6 +43,26 @@ const WORKFLOW_TEMPLATE = {
         }
     ]);
 
-    
+    const dataSources = [];
+
+    for(let i = 0; i < answers.numSources; i++) {
+        
+
+        const source = await inquirer.createPromptModule([
+            {
+                type: 'list',
+                name: 'type',
+                message: `Data source ${i + 1} type:`,
+                choices: ['REST API', 'Database', 'CSV File', 'WebSocket', 'Custom']
+            
+            },
+
+            {
+                
+            }
+        ])
+    }
+
+
  }
 
