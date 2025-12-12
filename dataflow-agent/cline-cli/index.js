@@ -18,7 +18,7 @@ const WORKFLOW_TEMPLATE = {
 };
 
 
- async function main() {
+async function main() {
 
     console.log('\n DataFlow Agent - WorkFlow Generator\n')
 
@@ -31,7 +31,7 @@ const WORKFLOW_TEMPLATE = {
         },
         {
             type: 'number',
-            name : 'numSources',
+            name: 'numSources',
             message: 'How many data sources? (2-5)',
             default: 3
         },
@@ -45,8 +45,8 @@ const WORKFLOW_TEMPLATE = {
 
     const dataSources = [];
 
-    for(let i = 0; i < answers.numSources; i++) {
-        
+    for (let i = 0; i < answers.numSources; i++) {
+
 
         const source = await inquirer.createPromptModule([
             {
@@ -54,15 +54,30 @@ const WORKFLOW_TEMPLATE = {
                 name: 'type',
                 message: `Data source ${i + 1} type:`,
                 choices: ['REST API', 'Database', 'CSV File', 'WebSocket', 'Custom']
-            
+
             },
 
             {
-                
+                type: 'input',
+                name: 'name',
+                message: `Source ${i + 1} name:`,
+                default: `source_${i + 1}`
+            },
+            {
+                type: 'input',
+                name: 'endpoint',
+                message: `Source ${i + 1} endpoint/path:`,
+                default: 'https://api.example.com/data'
+            },
+            {
+                type: 'list',
+                name: 'auth',
+                message: `Source ${i + 1} authentication:`,
+                choices: ['None', 'Bearer Token', 'API Key', 'Basic Auth']
             }
         ])
     }
 
 
- }
+}
 
