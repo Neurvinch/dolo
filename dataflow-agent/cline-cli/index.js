@@ -18,3 +18,31 @@ const WORKFLOW_TEMPLATE = {
 };
 
 
+ async function main() {
+
+    console.log('\n DataFlow Agent - WorkFlow Generator\n')
+
+    const answers = await inquirer.createPromptModule([
+        {
+            type: 'input',
+            name: 'workflow_name',
+            message: 'Workflow name:',
+            default: 'my_data_pipeline',
+        },
+        {
+            type: 'number',
+            name : 'numSources',
+            message: 'How many data sources? (2-5)',
+            default: 3
+        },
+        {
+            type: 'confirm',
+            name: 'includeSynthesis',
+            message: 'Include synthesis/decision agent?',
+            default: true
+        }
+    ]);
+
+    
+ }
+
