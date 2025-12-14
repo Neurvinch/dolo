@@ -1,0 +1,12 @@
+node_modules
+coverage
+tests
+*.test.js
+.git
+.gitignore
+README.md
+docs
+kestra
+oumi
+cline-cli
+vercel-frontend
