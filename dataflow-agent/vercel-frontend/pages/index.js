@@ -9,12 +9,16 @@ export default function Dashboard() {
     const [lastUpdate, setLastUpdate] = useState(null);
     const [error, setError] = useState(null);
     const [triggering, setTriggering] = useState(false);
+    const [backendUrl, setBackendUrl] = useState('/api/v1');
+    const [useCustomBackend, setUseCustomBackend] = useState(true);
 
     const triggerWorkflow = async () => {
         setTriggering(true);
         try {
-            const response = await fetch('http://localhost:8080/api/v1/execute', {
-                method: 'POST'
+            const url = useCustomBackend ? `${backendUrl}/execute` : 'http://localhost:8080/api/v1/execute';
+            const response = await fetch(url, {
+                method: 'POST',
+                mode: 'cors'
             });
             if (response.ok) {
                 const data = await response.json();
@@ -26,11 +30,24 @@ export default function Dashboard() {
             }
         } catch (error) {
             console.error('Failed to trigger workflow:', error);
-            setError('Failed to trigger workflow');
+            setError('Failed to trigger workflow: ' + error.message);
         } finally {
             setTriggering(false);
         }
     };
+
+    useEffect(() => {
+        // Load saved preferences from localStorage
+        const savedBackendUrl = localStorage.getItem('backendUrl');
+        const savedUseCustomBackend = localStorage.getItem('useCustomBackend');
+        
+        if (savedBackendUrl) {
+            setBackendUrl(savedBackendUrl);
+        }
+        if (savedUseCustomBackend !== null) {
+            setUseCustomBackend(savedUseCustomBackend === 'true');
+        }
+    }, []);
 
     useEffect(() => {
         // Apply dark mode
@@ -58,37 +75,48 @@ export default function Dashboard() {
             setError(null);
             console.log('Fetching data...');
             
-            // Fetch summaries
-            const summariesRes = await fetch('/api/summaries');
-            console.log('Summaries response:', summariesRes.status);
+            // Determine which endpoint to use
+            const apiBase = useCustomBackend ? backendUrl : 'http://localhost:8080/api/v1';
             
-            if (summariesRes.ok) {
-                const summariesData = await summariesRes.json();
-                console.log('Summaries data:', summariesData);
-                if (Array.isArray(summariesData)) {
-                    setSummaries(summariesData);
+            // Fetch summaries
+            try {
+                const summariesRes = await fetch(`${apiBase}/summaries`, { mode: 'cors' });
+                console.log('Summaries response:', summariesRes.status);
+                
+                if (summariesRes.ok) {
+                    const summariesData = await summariesRes.json();
+                    console.log('Summaries data:', summariesData);
+                    if (Array.isArray(summariesData)) {
+                        setSummaries(summariesData);
+                    } else {
+                        console.warn('Summaries data is not an array:', summariesData);
+                        setSummaries([]);
+                    }
                 } else {
-                    console.warn('Summaries data is not an array:', summariesData);
+                    console.error('Failed to fetch summaries:', summariesRes.status);
                     setSummaries([]);
                 }
-            } else {
-                console.error('Failed to fetch summaries:', summariesRes.status);
+            } catch (err) {
+                console.error('Error fetching summaries:', err);
                 setSummaries([]);
-                setError(`Failed to fetch summaries: ${summariesRes.status}`);
             }
 
             // Fetch latest decision
-            const decisionRes = await fetch('/api/decisions/latest');
-            console.log('Decision response:', decisionRes.status);
-            
-            if (decisionRes.ok) {
-                const decisionData = await decisionRes.json();
-                console.log('Decision data:', decisionData);
-                setDecision(decisionData);
-            } else {
-                console.error('Failed to fetch decision:', decisionRes.status);
+            try {
+                const decisionRes = await fetch(`${apiBase}/decisions/latest`, { mode: 'cors' });
+                console.log('Decision response:', decisionRes.status);
+                
+                if (decisionRes.ok) {
+                    const decisionData = await decisionRes.json();
+                    console.log('Decision data:', decisionData);
+                    setDecision(decisionData);
+                } else {
+                    console.error('Failed to fetch decision:', decisionRes.status);
+                    setDecision(null);
+                }
+            } catch (err) {
+                console.error('Error fetching decision:', err);
                 setDecision(null);
-                setError(`Failed to fetch decision: ${decisionRes.status}`);
             }
 
             setLastUpdate(new Date());
@@ -133,7 +161,7 @@ export default function Dashboard() {
                                 Multi-source AI-powered data orchestration
                             </p>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 flex-wrap">
                             {lastUpdate && (
                                 <span className="text-sm text-gray-400">
                                     Updated: {lastUpdate.toLocaleTimeString()}
@@ -144,6 +172,44 @@ export default function Dashboard() {
                                     ⚠️ {error}
                                 </span>
                             )}
+                            
+                            {/* Backend Configuration Toggle */}
+                            <div className="flex items-center gap-2 px-3 py-1 bg-gray-800 rounded-lg border border-gray-700">
+                                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={useCustomBackend}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setUseCustomBackend(checked);
+                                            localStorage.setItem('useCustomBackend', checked);
+                                            if (checked) {
+                                                fetchData();
+                                            }
+                                        }}
+                                        className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+                                    />
+                                    <span className={useCustomBackend ? 'text-green-400 font-semibold' : 'text-gray-400'}>
+                                        {useCustomBackend ? '🟢 Live Data' : '📊 Demo Mode'}
+                                    </span>
+                                </label>
+                            </div>
+                            
+                            {/* Backend URL Input (when using custom backend) */}
+                            {useCustomBackend && (
+                                <input
+                                    type="text"
+                                    value={backendUrl}
+                                    onChange={(e) => {
+                                        setBackendUrl(e.target.value);
+                                        localStorage.setItem('backendUrl', e.target.value);
+                                    }}
+                                    placeholder="http://localhost:8080"
+                                    className="px-3 py-2 bg-gray-800 text-white text-sm border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    style={{ width: '200px' }}
+                                />
+                            )}
+                            
                             <button
                                 onClick={fetchData}
                                 className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2"
