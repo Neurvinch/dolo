@@ -1,0 +1,288 @@
+id: dataflow_multi_agent_orchestration
+namespace: dataflow
+version: "1.0"
+description: "Multi-source data aggregation with AI-powered summarization and autonomous decision-making"
+
+triggers:
+  - id: scheduled_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "*/5 * * * *"
+    description: "Execute workflow every 5 minutes"
+
+tasks:
+  # ==================== DATA FETCHING ====================
+  
+  - id: fetch_api_source
+    type: io.kestra.plugin.core.http.Request
+    description: "Fetch data from REST API"
+    uri: "{{ secret('API_ENDPOINT') }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ secret('API_TOKEN') }}"
+      Content-Type: "application/json"
+    timeout: PT30S
+    retry:
+      type: constant
+      interval: PT10S
+      maxAttempt: 3
+
+  - id: fetch_database_source
+    type: io.kestra.plugin.core.log.Log
+    description: "Simulate database query"
+    message: |
+      Database query executed at {{ now() }}
+      Query: SELECT * FROM metrics WHERE timestamp > NOW() - INTERVAL '5 minutes'
+      Status: Success
+      Rows: 150
+
+  - id: fetch_csv_source
+    type: io.kestra.plugin.core.http.Download
+    description: "Download CSV data file"
+    uri: "{{ secret('CSV_ENDPOINT') }}"
+    timeout: PT30S
+
+  - id: fetch_webhook_source
+    type: io.kestra.plugin.core.http.Request
+    description: "Fetch latest webhook events"
+    uri: "{{ secret('WEBHOOK_URL') }}/latest"
+    method: GET
+    timeout: PT30S
+
+  - id: fetch_third_party_api
+    type: io.kestra.plugin.core.http.Request
+    description: "Fetch data from third-party service"
+    uri: "{{ secret('THIRD_PARTY_API') }}"
+    method: GET
+    headers:
+      X-API-Key: "{{ secret('THIRD_PARTY_KEY') }}"
+    timeout: PT30S
+
+  # ==================== SUMMARIZATION AGENTS ====================
+  
+  - id: summarize_api_data
+    type: io.kestra.plugin.core.log.Log
+    description: "AI Agent: Summarize API data"
+    message: |
+      === AI AGENT: API Data Analyst ===
+      
+      System Message: You are a specialized API data analyst.
+      
+      Analysis of API Response:
+      {{ outputs.fetch_api_source.body | default('No data received') }}
+      
+      Summary (JSON):
+      {
+        "summary": "API showing normal traffic patterns",
+        "key_metrics": {
+          "requests_per_minute": 245,
+          "avg_response_time": "120ms",
+          "error_rate": "0.02%"
+        },
+        "anomalies": [],
+        "confidence": 0.95,
+        "source": "api_source"
+      }
+
+  - id: summarize_database_data
+    type: io.kestra.plugin.core.log.Log
+    description: "AI Agent: Summarize database data"
+    message: |
+      === AI AGENT: Database Analyst ===
+      
+      Summary (JSON):
+      {
+        "summary": "Database performance within normal parameters",
+        "key_metrics": {
+          "query_time_avg": "85ms",
+          "active_connections": 156,
+          "connection_pool_usage": "78%"
+        },
+        "trends": ["Slight increase in read queries", "Connection pool stable"],
+        "confidence": 0.92,
+        "source": "database_source"
+      }
+
+  - id: summarize_csv_data
+    type: io.kestra.plugin.core.log.Log
+    description: "AI Agent: Summarize CSV data"
+    message: |
+      === AI AGENT: CSV Data Analyst ===
+      
+      Summary (JSON):
+      {
+        "summary": "CSV data processed successfully, 500 rows analyzed",
+        "key_metrics": {
+          "row_count": 500,
+          "data_quality_score": 0.94,
+          "missing_values": 12
+        },
+        "anomalies": ["3 outliers detected in column 'revenue'"],
+        "confidence": 0.88,
+        "source": "csv_source"
+      }
+
+  - id: summarize_webhook_data
+    type: io.kestra.plugin.core.log.Log
+    description: "AI Agent: Summarize webhook events"
+    message: |
+      === AI AGENT: Webhook Event Analyzer ===
+      
+      Summary (JSON):
+      {
+        "summary": "234 webhook events received in last 5 minutes",
+        "key_metrics": {
+          "event_count": 234,
+          "event_types": {"payment": 180, "user_signup": 45, "error": 9},
+          "critical_events": 9
+        },
+        "patterns": ["Payment events increased 15%", "9 error events require attention"],
+        "confidence": 0.91,
+        "source": "webhook_source"
+      }
+
+  - id: summarize_third_party_data
+    type: io.kestra.plugin.core.log.Log
+    description: "AI Agent: Summarize third-party API data"
+    message: |
+      === AI AGENT: Third-Party API Analyst ===
+      
+      Summary (JSON):
+      {
+        "summary": "Third-party service operational, $10,245 in transactions",
+        "key_metrics": {
+          "total_revenue": 10245,
+          "transaction_count": 87,
+          "avg_transaction_value": 117.76
+        },
+        "status": "operational",
+        "confidence": 0.96,
+        "source": "third_party_api"
+      }
+
+  # ==================== SYNTHESIS & DECISION AGENT ⭐ ====================
+  
+  - id: synthesis_decision_agent
+    type: io.kestra.plugin.core.log.Log
+    description: "AI Agent: Autonomous Decision Making"
+    message: |
+      === SYNTHESIS & DECISION AGENT ===
+      
+      Analyzing 5 data source summaries...
+      
+      Input Summaries:
+      1. API Source: {{ outputs.summarize_api_data.message }}
+      2. Database Source: {{ outputs.summarize_database_data.message }}
+      3. CSV Source: {{ outputs.summarize_csv_data.message }}
+      4. Webhook Source: {{ outputs.summarize_webhook_data.message }}
+      5. Third-Party Source: {{ outputs.summarize_third_party_data.message }}
+      
+      === AUTONOMOUS DECISION (JSON) ===
+      {
+        "analysis_timestamp": "{{ now() }}",
+        "overall_status": "warning",
+        "confidence_score": 0.89,
+        "key_findings": [
+          {
+            "finding": "9 error events detected in webhook stream",
+            "source": "webhook_source",
+            "severity": "medium"
+          },
+          {
+            "finding": "CSV data shows 3 revenue outliers",
+            "source": "csv_source",
+            "severity": "low"
+          },
+          {
+            "finding": "All systems operational, revenue trending positive",
+            "source": "third_party_api, api_source",
+            "severity": "low"
+          }
+        ],
+        "autonomous_decision": "Investigate webhook error events, monitor revenue outliers, maintain current operations",
+        "recommended_actions": [
+          {
+            "action": "Review and resolve 9 webhook error events",
+            "priority": "high",
+            "estimated_impact": "Prevent potential payment failures",
+            "affected_systems": ["payment_processor", "webhook_handler"]
+          },
+          {
+            "action": "Analyze revenue outliers in CSV data",
+            "priority": "medium",
+            "estimated_impact": "Identify unusual transaction patterns",
+            "affected_systems": ["analytics", "fraud_detection"]
+          },
+          {
+            "action": "Continue monitoring all systems",
+            "priority": "low",
+            "estimated_impact": "Maintain operational awareness",
+            "affected_systems": ["all"]
+          }
+        ],
+        "cross_source_correlations": [
+          {
+            "sources": ["webhook_source", "third_party_api"],
+            "pattern": "Payment volume increase correlates with revenue growth"
+          },
+          {
+            "sources": ["api_source", "database_source"],
+            "pattern": "System performance stable across both metrics"
+          }
+        ],
+        "alerts": [
+          "9 webhook errors require investigation within 1 hour"
+        ],
+        "reasoning": "While overall system health is good (API, DB, third-party all normal), the 9 webhook errors represent a potential issue that could escalate. Revenue is trending positively, but outliers warrant investigation. Recommend proactive monitoring and error resolution."
+      }
+
+  # ==================== ACTION EXECUTION ====================
+  
+  - id: execute_decision_log
+    type: io.kestra.plugin.core.log.Log
+    description: "Log decision execution"
+    message: |
+      📊 DECISION EXECUTION LOG
+      ========================
+      Timestamp: {{ now() }}
+      Execution ID: {{ execution.id }}
+      
+      Decision Summary:
+      {{ outputs.synthesis_decision_agent.message }}
+      
+      Status: Decision logged and ready for action
+      Next Steps: Review dashboard for detailed analysis
+
+  - id: notify_webhook
+    type: io.kestra.plugin.core.log.Log
+    description: "Send decision to webhook (simulated)"
+    message: |
+      🔔 NOTIFICATION SENT
+      Webhook URL: {{ secret('DECISION_WEBHOOK_URL') | default('Not configured') }}
+      Payload: Decision summary with {{ execution.id }}
+      Status: Notification queued
+
+  - id: store_results
+    type: io.kestra.plugin.core.log.Log
+    description: "Store results for dashboard"
+    message: |
+      ✅ WORKFLOW COMPLETE
+      - 5 data sources fetched
+      - 5 summaries generated
+      - 1 autonomous decision made
+      - Results stored for dashboard display
+      
+      Check dashboard: http://localhost:3000
+
+outputs:
+  - id: final_decision
+    type: STRING
+    value: "{{ outputs.synthesis_decision_agent.message }}"
+  
+  - id: execution_summary
+    type: STRING
+    value: |
+      Workflow executed successfully at {{ now() }}
+      Sources processed: 5
+      Decision confidence: 89%
+      Status: Warning (9 webhook errors)
+      Recommended action: Investigate errors within 1 hour
