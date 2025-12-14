@@ -72,7 +72,9 @@ npm install
 cp .env.example .env
 # Edit .env with your actual values
 
-# Start Kestra (in separate terminal)
+# Start DataFlow Orchestration Server (in separate terminal)
+npm run server
+# OR if Docker is available:
 cd kestra
 docker-compose up -d
 

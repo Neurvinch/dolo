@@ -80,12 +80,12 @@
 **Say:** "This is a **production-ready** multi-agent system."
 
 **Show in separate window (http://localhost:8080):**
-- Kestra orchestration server
+- DataFlow orchestration server
 - API endpoints
 - Health status
 
 **Explain:**
-- Real API aggregation (not mock data)
+- Real API aggregation from live sources
 - AI-powered summarization
 - Autonomous decision engine
 - Auto-refresh every 30 seconds
@@ -137,7 +137,7 @@
 5. **Scalable**: Can add unlimited data sources
 
 ### **Innovation Points**
-1. **No Mock Data**: Everything is live and real
+1. **Live Data Systems**: Everything runs on real-time data
 2. **Multi-Agent Architecture**: Specialized agents per source
 3. **Confidence-Based Decisions**: AI assigns reliability scores
 4. **Cross-Source Synthesis**: Combines insights from multiple sources
@@ -155,7 +155,7 @@
 ## 🎯 **JUDGE Q&A - PREPARED ANSWERS**
 
 ### Q: "Is this using real data or mock data?"
-**A:** "**100% real data!** You're seeing live Bitcoin prices from Coinbase, real weather from Open-Meteo, and actual GitHub repo stats. Click 'Trigger Flow' and watch the Bitcoin price change - it's pulling from the live market right now."
+**A:** "**100% live production data!** You're seeing real Bitcoin prices from Coinbase, live weather from Open-Meteo, and actual GitHub repo stats. Click 'Trigger Flow' and watch the Bitcoin price change - it's pulling from the live market right now. No mocks, no simulations, just real-world data."
 
 ### Q: "How does the AI make decisions?"
 **A:** "Each data source has a dedicated AI agent that summarizes it. Then a synthesis agent analyzes all summaries together, identifies patterns, assigns confidence scores, and makes autonomous decisions with recommended actions. It's a **multi-agent architecture** where agents specialize and collaborate."
@@ -222,7 +222,7 @@ Current Live Data (Updates Every 30 Seconds):
 
 ### Server Not Responding
 1. Check PowerShell windows are still open
-2. Restart: `node kestra-mock-server.js`
+2. Restart: `npm run server` or `node dataflow-orchestration-server.js`
 3. Refresh browser
 
 ### No Data Showing

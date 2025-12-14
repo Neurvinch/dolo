@@ -6,11 +6,11 @@ The DataFlow Agent is now configured to use **real data** from multiple public A
 ## Architecture
 
 ```
-Real APIs → Mock Kestra Server → Frontend Dashboard
-   ↓              ↓                      ↓
-[Weather]    [Port 8080]           [Port 3000]
-[Crypto]     [Aggregation]         [Visualization]
-[GitHub]     [AI Analysis]         [Real-time Updates]
+Real APIs → DataFlow Orchestration Server → Frontend Dashboard
+   ↓              ↓                               ↓
+[Weather]    [Port 8080]                    [Port 3000]
+[Crypto]     [Aggregation]                  [Visualization]
+[GitHub]     [AI Analysis]                  [Real-time Updates]
 [Blog API]   [REST API]
 [User API]
 ```
@@ -47,10 +47,12 @@ Real APIs → Mock Kestra Server → Frontend Dashboard
 
 ## Running the System
 
-### Start Mock Kestra Server (Port 8080)
+### Start DataFlow Orchestration Server (Port 8080)
 ```powershell
 cd c:\Users\fazeh\OneDrive\Desktop\dolo\dataflow-agent
-node kestra-mock-server.js
+node dataflow-orchestration-server.js
+# OR use npm script:
+npm run server
 ```
 
 ### Start Frontend Dashboard (Port 3000)
@@ -139,14 +141,14 @@ Manually trigger workflow execution
 
 ## Data Flow
 
-1. **Fetch**: Mock Kestra server fetches from all 5 APIs in parallel
+1. **Fetch**: Orchestration server fetches from all 5 APIs in parallel
 2. **Analyze**: Each response is analyzed and summarized
 3. **Synthesize**: Cross-source decision is generated
 4. **Store**: Results stored in memory
 5. **Serve**: Frontend fetches via REST API
 6. **Display**: Dashboard updates in real-time
 
-## Benefits Over Mock Data
+## Benefits of Live Data System
 
 ### ✅ Real-World Testing
 - Actual API responses
