@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
-import '../styles/globals.css';
 
 export default function Dashboard() {
     const [summaries, setSummaries] = useState([]);
@@ -8,6 +7,30 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [darkMode, setDarkMode] = useState(true);
     const [lastUpdate, setLastUpdate] = useState(null);
+    const [error, setError] = useState(null);
+    const [triggering, setTriggering] = useState(false);
+
+    const triggerWorkflow = async () => {
+        setTriggering(true);
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/execute', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Workflow triggered:', data);
+                // Wait a moment then refresh
+                setTimeout(() => {
+                    fetchData();
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('Failed to trigger workflow:', error);
+            setError('Failed to trigger workflow');
+        } finally {
+            setTriggering(false);
+        }
+    };
 
     useEffect(() => {
         // Apply dark mode
@@ -32,20 +55,49 @@ export default function Dashboard() {
 
     const fetchData = async () => {
         try {
+            setError(null);
+            console.log('Fetching data...');
+            
             // Fetch summaries
             const summariesRes = await fetch('/api/summaries');
-            const summariesData = await summariesRes.json();
-            setSummaries(summariesData);
+            console.log('Summaries response:', summariesRes.status);
+            
+            if (summariesRes.ok) {
+                const summariesData = await summariesRes.json();
+                console.log('Summaries data:', summariesData);
+                if (Array.isArray(summariesData)) {
+                    setSummaries(summariesData);
+                } else {
+                    console.warn('Summaries data is not an array:', summariesData);
+                    setSummaries([]);
+                }
+            } else {
+                console.error('Failed to fetch summaries:', summariesRes.status);
+                setSummaries([]);
+                setError(`Failed to fetch summaries: ${summariesRes.status}`);
+            }
 
             // Fetch latest decision
             const decisionRes = await fetch('/api/decisions/latest');
-            const decisionData = await decisionRes.json();
-            setDecision(decisionData);
+            console.log('Decision response:', decisionRes.status);
+            
+            if (decisionRes.ok) {
+                const decisionData = await decisionRes.json();
+                console.log('Decision data:', decisionData);
+                setDecision(decisionData);
+            } else {
+                console.error('Failed to fetch decision:', decisionRes.status);
+                setDecision(null);
+                setError(`Failed to fetch decision: ${decisionRes.status}`);
+            }
 
             setLastUpdate(new Date());
             setLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
+            setError(error.message);
+            setSummaries([]);
+            setDecision(null);
             setLoading(false);
         }
     };
@@ -83,10 +135,28 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center gap-4">
                             {lastUpdate && (
-                                <div className="text-sm text-gray-400">
-                                    Last update: {lastUpdate.toLocaleTimeString()}
-                                </div>
+                                <span className="text-sm text-gray-400">
+                                    Updated: {lastUpdate.toLocaleTimeString()}
+                                </span>
                             )}
+                            {error && (
+                                <span className="text-sm text-red-400">
+                                    ⚠️ {error}
+                                </span>
+                            )}
+                            <button
+                                onClick={fetchData}
+                                className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                            >
+                                🔄 Refresh
+                            </button>
+                            <button
+                                onClick={triggerWorkflow}
+                                disabled={triggering}
+                                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                            >
+                                {triggering ? '⏳ Running...' : '▶️ Trigger Flow'}
+                            </button>
                             <button
                                 onClick={() => setDarkMode(!darkMode)}
                                 className="p-2 rounded-lg bg-dark-bg hover:bg-gray-700 transition-colors"
@@ -115,15 +185,15 @@ export default function Dashboard() {
                     />
                     <StatCard
                         title="Confidence"
-                        value={decision?.confidence_score ? `${(decision.confidence_score * 100).toFixed(0)}%` : 'N/A'}
+                        value={decision?.confidence ? `${(decision.confidence * 100).toFixed(0)}%` : 'N/A'}
                         icon="🎯"
                         color="green"
                     />
                     <StatCard
                         title="Status"
-                        value={decision?.overall_status || 'Unknown'}
-                        icon={decision?.overall_status === 'normal' ? '✅' : decision?.overall_status === 'warning' ? '⚠️' : '🔴'}
-                        color={decision?.overall_status === 'normal' ? 'green' : decision?.overall_status === 'warning' ? 'yellow' : 'red'}
+                        value="Active"
+                        icon="✅"
+                        color="green"
                     />
                 </div>
 
@@ -134,12 +204,13 @@ export default function Dashboard() {
                             📊 Data Sources
                         </h2>
                         <div className="space-y-4">
-                            {summaries.map((source, index) => (
-                                <SourceCard key={index} source={source} />
-                            ))}
-                            {summaries.length === 0 && (
+                            {Array.isArray(summaries) && summaries.length > 0 ? (
+                                summaries.map((source, index) => (
+                                    <SourceCard key={index} source={source} />
+                                ))
+                            ) : (
                                 <p className="text-gray-400 text-center py-8">
-                                    No data sources configured yet
+                                    {loading ? 'Loading data sources...' : 'No data sources configured yet'}
                                 </p>
                             )}
                         </div>
@@ -152,52 +223,55 @@ export default function Dashboard() {
                         </h2>
                         {decision ? (
                             <div className="space-y-4">
-                                <div className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${decision.overall_status === 'normal' ? 'bg-green-500/20 text-green-400' :
-                                        decision.overall_status === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
-                                            'bg-red-500/20 text-red-400'
-                                    }`}>
-                                    {decision.overall_status?.toUpperCase()}
+                                <div className="bg-green-500/20 text-green-400 inline-block px-4 py-2 rounded-full text-sm font-semibold">
+                                    ACTIVE
                                 </div>
 
                                 <div className="bg-dark-bg rounded-lg p-4">
                                     <p className="text-gray-300 mb-2">
                                         <span className="text-gray-500">Confidence:</span>{' '}
                                         <span className="font-semibold text-primary-400">
-                                            {(decision.confidence_score * 100).toFixed(0)}%
+                                            {(decision.confidence * 100).toFixed(0)}%
                                         </span>
                                     </p>
-                                    <p className="text-gray-300">
+                                    <p className="text-gray-300 mb-2">
                                         <span className="text-gray-500">Decision:</span>{' '}
-                                        <span className="text-white">{decision.autonomous_decision}</span>
+                                        <span className="text-white">{decision.decision}</span>
+                                    </p>
+                                    <p className="text-gray-400 text-sm mt-2">
+                                        {decision.reasoning}
                                     </p>
                                 </div>
 
-                                {decision.recommended_actions && decision.recommended_actions.length > 0 && (
+                                {decision.actions && decision.actions.length > 0 && (
                                     <div>
                                         <h3 className="text-sm font-semibold text-gray-400 mb-2">
                                             Recommended Actions:
                                         </h3>
                                         <ul className="space-y-2">
-                                            {decision.recommended_actions.map((action, idx) => (
+                                            {decision.actions.map((action, idx) => (
                                                 <li
                                                     key={idx}
-                                                    className={`flex items-start gap-2 p-3 rounded-lg ${action.priority === 'high' ? 'bg-red-500/10 border border-red-500/20' :
-                                                            action.priority === 'medium' ? 'bg-yellow-500/10 border border-yellow-500/20' :
-                                                                'bg-blue-500/10 border border-blue-500/20'
-                                                        }`}
+                                                    className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20"
                                                 >
-                                                    <span className="text-lg">
-                                                        {action.priority === 'high' ? '🔴' : action.priority === 'medium' ? '🟡' : '🔵'}
-                                                    </span>
+                                                    <span className="text-lg">🔵</span>
                                                     <div className="flex-1">
-                                                        <p className="text-white text-sm">{action.action}</p>
-                                                        <p className="text-gray-400 text-xs mt-1">{action.estimated_impact}</p>
+                                                        <p className="text-white text-sm">{action}</p>
                                                     </div>
                                                 </li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
+
+                                <div className="bg-dark-bg rounded-lg p-4 mt-4">
+                                    <p className="text-gray-400 text-xs">
+                                        <span className="font-semibold">Sources Analyzed:</span> {decision.sources_analyzed}
+                                    </p>
+                                    <p className="text-gray-400 text-xs">
+                                        <span className="font-semibold">Last Updated:</span> {new Date(decision.timestamp).toLocaleString()}
+                                    </p>
+                                </div>
                             </div>
                         ) : (
                             <p className="text-gray-400 text-center py-8">
