@@ -8,6 +8,8 @@ pnpm-lock.yaml
 
 wmd-docs
 
+a.ps1
+
 # Environment variables
 .env
 .env.local
