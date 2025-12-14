@@ -1,0 +1,79 @@
+# CodeRabbit Configuration for DataFlow Agent
+
+# Enable CodeRabbit AI reviews
+reviews:
+  # Review settings
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+      - develop
+  
+  # Review focus areas
+  profile: "chill"  # Options: strict, balanced, chill
+  
+  # What to review
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  
+  # Code quality checks
+  tools:
+    shellcheck:
+      enabled: true
+    yamllint:
+      enabled: true
+    eslint:
+      enabled: true
+    
+# Chat settings
+chat:
+  auto_reply: false
+  
+# Path-based rules
+path_filters:
+  - path: "**/*.test.js"
+    instructions: "Focus on test coverage and edge cases"
+    
+  - path: "**/cline-cli/**"
+    instructions: "Check for security vulnerabilities, especially input validation"
+    
+  - path: "**/vercel-frontend/**"
+    instructions: "Review for performance optimizations and accessibility"
+    
+  - path: "**/kestra/**"
+    instructions: "Validate YAML syntax and workflow logic"
+    
+  - path: "**/*.md"
+    instructions: "Check for clarity and completeness of documentation"
+
+# Language-specific settings
+language:
+  javascript:
+    level: "advanced"
+  yaml:
+    level: "intermediate"
+  markdown:
+    level: "basic"
+
+# Review priorities
+priorities:
+  - security
+  - performance
+  - maintainability
+  - documentation
+  
+# Auto-approve settings
+auto_approve:
+  enabled: false  # Require manual approval
+  
+# Ignore patterns
+path_instructions:
+  - path: "node_modules/**"
+    instructions: "Skip review"
+  - path: "coverage/**"
+    instructions: "Skip review"
+  - path: ".next/**"
+    instructions: "Skip review"
