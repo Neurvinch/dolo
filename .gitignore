@@ -1,2 +1,87 @@
-wmd-docs
-a.ps1
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.vercel/
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Secrets and keys
+*.pem
+*.key
+*.cert
+secrets/
+.kestra/secrets/
+
+# Model files (large)
+oumi/models/*.bin
+oumi/models/*.pt
+oumi/models/*.safetensors
+*.ckpt
+*.h5
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Generated workflows (optional - keep if you want to track them)
+# *.yml
+# *.yaml
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Python (for Oumi)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+ENV/
+
+# Docker
+.dockerignore
+
+# Misc
+.turbo/
