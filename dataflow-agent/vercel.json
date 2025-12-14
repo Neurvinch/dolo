@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "public": true,
+  "rewrites": [
+    {
+      "source": "/api/v1/summaries",
+      "destination": "/api/summaries"
+    },
+    {
+      "source": "/api/v1/decisions/latest",
+      "destination": "/api/decisions/latest"
+    },
+    {
+      "source": "/api/v1/execute",
+      "destination": "/api/execute"
+    },
+    {
+      "source": "/api/v1/health",
+      "destination": "/api/health"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        }
+      ]
+    }
+  ]
+}
