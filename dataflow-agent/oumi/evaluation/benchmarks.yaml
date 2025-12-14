@@ -1,0 +1,74 @@
+# Oumi Evaluation Benchmarks for DataFlow Agent
+
+benchmarks:
+  # BLEU Score (Bilingual Evaluation Understudy)
+  - name: "bleu"
+    description: "Measures n-gram overlap between generated and reference summaries"
+    baseline: 42.3
+    target: 51.8
+    improvement_required: 22.5%
+    
+  # ROUGE Score (Recall-Oriented Understudy for Gisting Evaluation)
+  - name: "rouge-l"
+    description: "Measures longest common subsequence"
+    baseline: 0.65
+    target: 0.78
+    improvement_required: 20.0%
+    
+  # Perplexity
+  - name: "perplexity"
+    description: "Measures how well the model predicts the sample"
+    baseline: 15.2
+    target: 12.0
+    improvement_required: 21.1%
+    
+  # Accuracy
+  - name: "json_validity"
+    description: "Percentage of outputs that are valid JSON"
+    baseline: 0.85
+    target: 0.98
+    improvement_required: 15.3%
+    
+  # Custom Metrics
+  - name: "confidence_accuracy"
+    description: "How well confidence scores match actual accuracy"
+    baseline: 0.72
+    target: 0.88
+    improvement_required: 22.2%
+
+# Evaluation datasets
+evaluation_sets:
+  - name: "api_data_summarization"
+    size: 100
+    description: "REST API response summarization"
+    
+  - name: "database_metrics_summarization"
+    size: 100
+    description: "Database performance metrics summarization"
+    
+  - name: "csv_data_analysis"
+    size: 100
+    description: "CSV data analysis and summarization"
+    
+  - name: "webhook_event_analysis"
+    size: 100
+    description: "Webhook event stream analysis"
+    
+  - name: "cross_source_synthesis"
+    size: 100
+    description: "Multi-source data synthesis and decision-making"
+
+# Total evaluation examples: 500
+
+# Success criteria
+success_criteria:
+  minimum_improvement: 20.0%  # Must achieve at least 20% improvement
+  all_benchmarks: true  # Must improve on ALL benchmarks
+  json_validity: 0.95  # At least 95% valid JSON outputs
+  
+# Reporting
+reporting:
+  format: "markdown"
+  include_graphs: true
+  save_predictions: true
+  output_file: "./evaluation/results.md"
