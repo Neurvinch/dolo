@@ -1,0 +1,60 @@
+{
+  "name": "dataflow-agent",
+  "version": "1.0.0",
+  "description": "Multi-source data aggregation with AI-powered summarization and autonomous decision-making",
+  "main": "index.js",
+  "bin": {
+    "dataflow": "./cline-cli/index.js"
+  },
+  "scripts": {
+    "cli": "node cline-cli/index.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:cli": "jest cline-cli/",
+    "test:integration": "jest tests/integration.test.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\"",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "preinstall": "npm audit --audit-level=moderate || true"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "kestra",
+    "workflow",
+    "automation",
+    "data-aggregation",
+    "multi-agent",
+    "hackathon"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "^8.2.5",
+    "yaml": "^2.3.4",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1",
+    "@types/jest": "^29.5.11",
+    "snyk": "^1.1272.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/dataflow-agent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/dataflow-agent/issues"
+  },
+  "homepage": "https://github.com/yourusername/dataflow-agent#readme"
+}
