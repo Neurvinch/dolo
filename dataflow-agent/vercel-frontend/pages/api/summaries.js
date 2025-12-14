@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Fetch real data from Kestra mock server
+        // Fetch data from DataFlow Orchestration Server
         const KESTRA_URL = process.env.KESTRA_URL || 'http://localhost:8080';
         
         const response = await fetch(`${KESTRA_URL}/api/v1/summaries`);
