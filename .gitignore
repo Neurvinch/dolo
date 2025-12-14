@@ -3,7 +3,8 @@ node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
-wmd-docs
+
+.wmd-docs
 
 # Environment variables
 .env
