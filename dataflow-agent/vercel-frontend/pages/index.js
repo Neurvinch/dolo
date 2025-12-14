@@ -297,7 +297,7 @@ export default function Dashboard() {
                                     <p className="text-gray-300 mb-2">
                                         <span className="text-gray-500">Confidence:</span>{' '}
                                         <span className="font-semibold text-primary-400">
-                                            {(decision.confidence * 100).toFixed(0)}%
+                                            {(decision.confidence * 1).toFixed(0)}%
                                         </span>
                                     </p>
                                     <p className="text-gray-300 mb-2">
