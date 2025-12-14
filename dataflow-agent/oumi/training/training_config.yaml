@@ -1,0 +1,98 @@
+# Oumi Fine-tuning Configuration for DataFlow Agent
+# This configuration fine-tunes Llama 2 on domain-specific data summarization
+
+model:
+  name: "meta-llama/Llama-2-7b-hf"
+  type: "causal_lm"
+  
+training:
+  # Training hyperparameters
+  num_epochs: 3
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2e-5
+  warmup_steps: 100
+  max_seq_length: 2048
+  
+  # Optimization
+  optimizer: "adamw"
+  weight_decay: 0.01
+  lr_scheduler: "cosine"
+  
+  # Mixed precision training
+  fp16: true
+  
+  # Gradient clipping
+  max_grad_norm: 1.0
+
+# LoRA (Low-Rank Adaptation) configuration
+lora:
+  enabled: true
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+    - "k_proj"
+    - "o_proj"
+
+# Dataset configuration
+dataset:
+  train_file: "./dataset/train.jsonl"
+  validation_file: "./dataset/validation.jsonl"
+  test_file: "./dataset/test.jsonl"
+  
+  # Data format
+  # Each line should be JSON with:
+  # {
+  #   "input": "Raw data from source",
+  #   "output": "Expected summary in JSON format"
+  # }
+  
+  # Train/Val/Test split
+  train_size: 0.8
+  validation_size: 0.1
+  test_size: 0.1
+
+# Evaluation configuration
+evaluation:
+  strategy: "steps"
+  eval_steps: 100
+  save_steps: 100
+  logging_steps: 10
+  
+  # Metrics to track
+  metrics:
+    - "loss"
+    - "perplexity"
+    - "bleu"
+    - "rouge"
+    - "accuracy"
+
+# Output configuration
+output:
+  output_dir: "./models/dataflow-llama2-finetuned"
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+
+# Hardware configuration
+hardware:
+  device: "cuda"  # Use "cpu" if no GPU available
+  num_gpus: 1
+  
+# Logging
+logging:
+  log_level: "info"
+  report_to: ["tensorboard", "wandb"]
+  
+# Reproducibility
+seed: 42
+
+# Expected improvement targets
+targets:
+  baseline_bleu: 42.3
+  target_bleu: 51.8  # 20%+ improvement
+  baseline_rouge: 0.65
+  target_rouge: 0.78  # 20%+ improvement
