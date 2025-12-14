@@ -3,10 +3,10 @@ module.exports = {
     coverageDirectory: 'coverage',
     collectCoverageFrom: [
         'cline-cli/**/*.js',
-        'vercel-frontend/**/*.js',
         '!**/node_modules/**',
         '!**/tests/**',
-        '!**/coverage/**'
+        '!**/coverage/**',
+        '!**/vercel-frontend/**'
     ],
     coverageThreshold: {
         global: {
